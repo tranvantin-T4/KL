@@ -229,6 +229,30 @@ const listUser=async(req,res)=>{
       res.status(500).json({ success: false, message: 'Server error' });
     }
   };
+  
+  const updateUserRole = async (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;  
+    
+    try {
+     
+      const updatedUser = await userModel.findByIdAndUpdate(
+        id,
+        { role },
+        { new: true }
+      );
+    
+      if (!updatedUser) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+    
+      res.json({ success: true, message: 'User role updated successfully', data: updatedUser });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  };
+  
   const getUserInfo = async (req, res) => {
     const { id } = req.params;
   
@@ -251,4 +275,4 @@ const listUser=async(req,res)=>{
   
   
 
-export { registerUser,loginUser,quenmk, verifyCodeAndResetPassword,changePassword,listUser,removeUser,updateUser,getUserInfo };
+export { registerUser,loginUser,quenmk, verifyCodeAndResetPassword,changePassword,listUser,removeUser,updateUser,getUserInfo,updateUserRole };
