@@ -1,14 +1,14 @@
-import ReviewSP from '../models/reviewspModel.js';
+import ReviewSV from '../models/reviewdvModel.js';
 
-const addReviewSP = async (req, res) => {
-    const { productId, userId, rating, comment } = req.body;
+const addReviewSV = async (req, res) => {
+    const { serviceId, userId, rating, comment } = req.body;
 
-    if (!productId || !userId || !rating || !comment) {
+    if (!serviceId || !userId || !rating || !comment) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
     try {
-      const newReview = new ReviewSP({ productId, userId, rating, comment });
+      const newReview = new ReviewSV({ serviceId, userId, rating, comment });
       await newReview.save();
       res.status(201).json({ success: true, message: 'Review added successfully', review: newReview });
     } catch (error) {
@@ -17,11 +17,11 @@ const addReviewSP = async (req, res) => {
     }
 };
 
-const getReviewsByProduct = async (req, res) => {
-    const { productId } = req.params;
+const getReviewsByService = async (req, res) => {
+    const { serviceId } = req.params;
 
     try {
-      const reviews = await ReviewSP.find({ productId }).sort({ createdAt: -1 });
+      const reviews = await ReviewSV.find({ serviceId }).sort({ createdAt: -1 });
       res.json({ success: true, reviews });
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -29,11 +29,11 @@ const getReviewsByProduct = async (req, res) => {
     }
 };
 
-const removeReviewSP = async (req, res) => {
+const removeReviewSV = async (req, res) => {
     const { id } = req.params;
 
     try {
-      await ReviewSP.findByIdAndDelete(id);
+      await ReviewSV.findByIdAndDelete(id);
       res.status(200).json({ success: true, message: 'Review removed successfully' });
     } catch (error) {
       console.error('Error removing review:', error);
@@ -41,4 +41,4 @@ const removeReviewSP = async (req, res) => {
     }
 };
 
-export { addReviewSP, getReviewsByProduct, removeReviewSP };
+export { addReviewSV, getReviewsByService, removeReviewSV };
