@@ -9,6 +9,8 @@ import orderRoute from "./routes/ordersRoutes.js";
 import reviewspRouter from "./routes/reviewspRoutes.js";
 import reviewdvRouter from "./routes/reviewdvRoutes.js";
 import voucherRoutes from './routes/voucherRoutes.js';
+import branchRoutes from './routes/branchRoutes.js';
+import employeeRoutes from './routes/employeeRoutes.js';
 
 const app = express();
 const port = 4000;
@@ -32,6 +34,8 @@ app.use('/api/cart',cartRouter)
 app.use('/api/order',orderRoute)
 app.use('/api/reviewsp', reviewspRouter);
 app.use('/api/reviewdv', reviewdvRouter);
+app.use('/api/branch', branchRoutes);
+app.use('/api/employeeRoutes', employeeRoutes);
 // app.use('/', voucherRoutes);
 
 app.get("/",(req,res)=>{

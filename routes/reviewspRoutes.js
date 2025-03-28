@@ -1,10 +1,10 @@
 import express from 'express';
 import { addReviewSP, getReviewsByProduct, removeReviewSP } from '../controllers/reviewspController.js';
 
-const router = express.Router();
+const reviewRouter = express.Router();
 
-router.post('/add', addReviewSP);
-router.get('/:productId', getReviewsByProduct);
-router.delete('/:id', removeReviewSP);
+reviewRouter.post('/add', addReviewSP);
+reviewRouter.get('/:productId', getReviewsByProduct);
+reviewRouter.delete('/:id', removeReviewSP);
 
-export default router;
+export default reviewRouter;

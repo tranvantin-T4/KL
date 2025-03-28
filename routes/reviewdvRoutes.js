@@ -1,9 +1,9 @@
 import express from 'express';
 import { addReviewSV, getReviewsByService, removeReviewSV } from '../controllers/reviewdvController.js';
 
-const router = express.Router();
-router.post('/add', addReviewSV);
-router.get('/:serviceId', getReviewsByService);
-router.delete('/:id', removeReviewSV);
+const reviewRouter = express.Router();
+reviewRouter.post('/add', addReviewSV);
+reviewRouter.get('/:serviceId', getReviewsByService);
+reviewRouter.delete('/:id', removeReviewSV);
 
-export default router;
+export default reviewRouter;
