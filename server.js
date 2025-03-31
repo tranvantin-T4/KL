@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 connectDB();
 
-
+app.use('/images',express.static('uploads'))
 app.use('/api/vouchers',voucherRoutes)
 app.use('/api/product',productRouter)
 app.use('/api/user',userRouter)
@@ -36,7 +36,7 @@ app.use('/api/reviewsp', reviewspRouter);
 app.use('/api/reviewdv', reviewdvRouter);
 app.use('/api/branch', branchRoutes);
 app.use('/api/employeeRoutes', employeeRoutes);
-// app.use('/', voucherRoutes);
+app.use('/', voucherRoutes);
 
 app.get("/",(req,res)=>{
     res.send("api")

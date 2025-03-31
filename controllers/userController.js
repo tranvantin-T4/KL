@@ -208,27 +208,43 @@ const listUser=async(req,res)=>{
     }
    };  
    const updateUser = async (req, res) => {
+    console.log('File uploaded:', req.file);  // Kiểm tra xem có file không
+    console.log('File ', req.body);
+    // Tiếp tục xử lý các thông tin người dùng và ảnh nếu có
     const { id } = req.params;
-    const { firstName, lastName, phone, address, email, image, dateOfBirth } = req.body;
-  
-    try {
-      
-      const updatedUser = await userModel.findByIdAndUpdate(
-        id,
-        { firstName, lastName, phone, address, email, image, dateOfBirth },
-        { new: true }  
-      );
-  
-      if (!updatedUser) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-      }
-  
-      res.json({ success: true, message: 'cập nhật User thành công', data: updatedUser });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Server error' });
+    const updateFields = {};
+
+    ['firstName', 'lastName', 'phone', 'address', 'email', 'dateOfBirth','image'].forEach(field => {
+        if (req.body[field] !== undefined) {
+            updateFields[field] = req.body[field];
+        }
+    });
+
+    if (req.file) {
+        const imagePath = `${req.file.filename}`;
+        updateFields.image = imagePath;
     }
-  };
+
+    try {
+        const updatedUser = await userModel.findByIdAndUpdate(
+            id,
+            { $set: updateFields },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.json({ success: true, message: 'Cập nhật User thành công', data: updatedUser });
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
+
   
   const updateUserRole = async (req, res) => {
     const { id } = req.params;
