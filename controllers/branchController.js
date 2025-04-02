@@ -3,7 +3,7 @@ import BranchModel from "../models/branchModel.js";
 const getAllBranches = async (req, res) => {
     try {
         const branches = await BranchModel.find();
-        res.status(200).json(branches);
+        res.json({success:true,data:branches})
     } catch (error) {
         res.status(500).json({ message: "Lỗi khi lấy danh sách chi nhánh", error });
     }
@@ -12,10 +12,11 @@ const getAllBranches = async (req, res) => {
 const getBranchById = async (req, res) => {
     try {
         const branch = await BranchModel.findById(req.params.id);
+        
         if (!branch) {
             return res.status(404).json({ message: "Không tìm thấy chi nhánh" });
         }
-        res.status(200).json(branch);
+        res.json({success:true,data:branch})
     } catch (error) {
         res.status(500).json({ message: "Lỗi khi lấy chi nhánh", error });
     }

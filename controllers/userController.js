@@ -44,26 +44,38 @@ const registerUser = async (req, res) => {
     }
 };
 //login
-const loginUser= async(req,res)=>{
-    const {email,password}=req.body;
+const loginUser = async (req, res) => {
+    const { email, password } = req.body;
+  
     try {
-      const user=await userModel.findOne({email})
+        const user = await userModel.findOne({ email });
   
-      if(!user){
-         return res.json({success:false,message:"user Doesn't exsist"})
-      }
-      const isMatch=await bcrypt.compare(password,user.password); //ss mk
-      if(!isMatch){
-          return res.json({success:false,message:"Invaild credentials"})
-      }
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User doesn't exist" });
+        }
   
-      const token =createToken(user._id);
-      res.json({success:true,token})
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Invalid credentials" });
+        }
+  
+        const token = createToken(user._id);
+  
+        return res.status(200).json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            },
+            message: "Login successful"
+        });
   
     } catch (error) {
-      console.log(token);
-      res.json({success:false,message:"Error"})
-      
+        console.error("Login Error:", error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
   };
   // quên  mk
@@ -207,39 +219,106 @@ const listUser=async(req,res)=>{
       res.json({success:false,message:'error'})
     }
    };  
-   const updateUser = async (req, res) => {
-    console.log('File uploaded:', req.file);  // Kiểm tra xem có file không
-    console.log('File ', req.body);
-    // Tiếp tục xử lý các thông tin người dùng và ảnh nếu có
-    const { id } = req.params;
-    const updateFields = {};
+//    const updateUser = async (req, res) => {
 
-    ['firstName', 'lastName', 'phone', 'address', 'email', 'dateOfBirth','image'].forEach(field => {
-        if (req.body[field] !== undefined) {
-            updateFields[field] = req.body[field];
+//     // Tiếp tục xử lý các thông tin người dùng và ảnh nếu có
+//     const { id } = req.params;
+//     const updateFields = {};
+
+//     ['firstName', 'lastName', 'phone', 'address', 'email', 'dateOfBirth','image'].forEach(field => {
+//         if (req.body[field] !== undefined) {
+//             updateFields[field] = req.body[field];
+//         }
+//     });
+
+//     if (req.file) {
+//         const imagePath = `${req.file.filename}`;
+//         updateFields.image = imagePath;
+//     }
+
+//     try {
+//         const updatedUser = await userModel.findByIdAndUpdate(
+//             id,
+//             { $set: updateFields },
+//             { new: true }
+//         );
+
+//         if (!updatedUser) {
+//             return res.status(404).json({ success: false, message: 'User not found' });
+//         }
+
+//         res.json({ success: true, message: 'Cập nhật User thành công', data: updatedUser });
+//     } catch (error) {
+//         console.error("Error updating user:", error);
+//         res.status(500).json({ success: false, message: 'Server error' });
+//     }
+// };
+const updateUser = async (req, res) => {
+    const { id } = req.params; // Lấy id từ URL
+    const authenticatedUserId = req.user?.id;
+
+     
+    const { firstName, lastName, phone, address, email, dateOfBirth } = req.body;
+
+    const updateData = {
+        firstName,
+        lastName,
+        phone,
+        address,
+        dateOfBirth 
+    };
+
+
+    const userToUpdate = await userModel.findById(id);
+    if (!userToUpdate) {
+        return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
+    }
+    if (email && email !== userToUpdate.email) {
+        // Kiểm tra email mới có hợp lệ và đã tồn tại chưa
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ success: false, message: 'Email mới không hợp lệ.' });
         }
-    });
+        const existingUser = await userModel.findOne({ email: email });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'Email mới đã được sử dụng.' });
+        }
+        updateData.email = email; // Chỉ thêm email vào updateData nếu nó hợp lệ và chưa tồn tại
+    }
+
 
     if (req.file) {
-        const imagePath = `${req.file.filename}`;
-        updateFields.image = imagePath;
+        console.log("File ảnh mới đã được upload:", req.file.filename);
+        updateData.image = req.file.filename; 
+        
+    } else {
+         
+         console.log("Không có file ảnh mới, giữ nguyên ảnh cũ:", userToUpdate.image);
     }
+
 
     try {
         const updatedUser = await userModel.findByIdAndUpdate(
             id,
-            { $set: updateFields },
-            { new: true }
-        );
+            { $set: updateData }, // Sử dụng $set để chỉ cập nhật các trường được cung cấp
+            { new: true, runValidators: true } // runValidators để kiểm tra schema nếu có
+        ).select('-password'); // Loại bỏ mật khẩu khỏi kết quả trả về
 
         if (!updatedUser) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng sau khi cập nhật.' });
         }
 
-        res.json({ success: true, message: 'Cập nhật User thành công', data: updatedUser });
+        console.log("User đã cập nhật thành công:", updatedUser._id);
+        res.status(200).json({
+            success: true,
+            message: 'Cập nhật thông tin người dùng thành công.',
+            data: updatedUser // Trả về dữ liệu user đã cập nhật (không có password)
+        });
     } catch (error) {
-        console.error("Error updating user:", error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error(`Lỗi khi cập nhật user ${id}:`, error);
+        if (error.name === 'ValidationError') {
+             return res.status(400).json({ success: false, message: 'Dữ liệu không hợp lệ.', errors: error.errors });
+        }
+        res.status(500).json({ success: false, message: 'Lỗi máy chủ nội bộ khi cập nhật người dùng.', error: error.message });
     }
 };
 

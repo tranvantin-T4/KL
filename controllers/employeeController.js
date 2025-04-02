@@ -70,14 +70,16 @@ const deleteEmployee = async (req, res) => {
 
 
 
-// Lấy danh sách nhân viên
 const getAllEmployees = async (req, res) => {
     try {
-        const employees = await EmployeeModel.find().populate('BranchID').populate('UserID');
+        const employees = await EmployeeModel.find()
+            .populate('BranchID', 'BranchName')  // Populate only the BranchName
+            .populate('UserID', 'name email');  // Populate User's name and email
+
         res.status(200).json({ employees });
     } catch (error) {
-        console.error("Lỗi khi lấy danh sách nhân viên:", error);
-        res.status(500).json({ message: "Lỗi khi lấy danh sách nhân viên", error });
+        console.error("Error fetching employees:", error);
+        res.status(500).json({ message: "Error fetching employees", error });
     }
 };
 
